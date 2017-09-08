@@ -1,0 +1,17 @@
+{
+  "name": "dom-properties-mixin",
+  "version": "1.0.0",
+  "description": "Mixinable DOM element properties",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "DOM",
+    "properties",
+    "DOM",
+    "manipulation"
+  ],
+  "author": "Quentin Engles <hollowdoor99@gmail.com> (https://hollowdoor.github.io/)",
+  "license": "MIT"
+}
