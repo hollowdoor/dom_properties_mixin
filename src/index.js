@@ -2,6 +2,8 @@ import arrayFrom from 'array-from';
 import cssProxy from 'css-proxy';
 
 const props = (()=>{
+    //Renamed properties, and properties with unique behaviors
+    //are assigned directly to the original props object
     const props = {
         parent: {
             get(){ return this.element.parentNode; }
@@ -9,11 +11,17 @@ const props = (()=>{
         first:{
             get(){
                 return this.element.firstChild;
+            },
+            set(value){
+                this.element.replaceChild(value, this.firstChild);
             }
         },
         last: {
             get(){
                 return this.element.lastChild;
+            },
+            set(value){
+                this.element.replaceChild(value, this.lastChild);
             }
         },
         children: {
