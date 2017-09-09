@@ -38,19 +38,22 @@ var props = (function (){
                 return arrayFrom(this.element.childNodes);
             }
         },
-        value: {
-            set: function set(value){
+        /*value: {
+            set(value){
                 this.element.value = value;
             },
-            get: function get(){
+            get(){
                 return this.element.value;
             }
         },
         innerHTML: {
-            set: function set(html){
+            set(html){
                 this.element.innerHTML = html;
+            },
+            get(){
+                return this.element.innerHTML;
             }
-        },
+        },*/
         style: {
             get: function get(){
                 if(!this._style){
@@ -66,9 +69,22 @@ var props = (function (){
         },
     };
 
-    Object.keys(props).forEach(function (prop){ return prop.enumerable = true; });
+    ['value', 'innerHTML']
+    .forEach(function (prop){
+        props[prop] = {
+            get: function get(){
+                return this.element[prop];
+            },
+            set: function set(value){
+                this.element[prop] = value;
+            }
+        };
+    });
+
+    Object.keys(props).forEach(function (key){ return props[key].enumerable = true; });
     return props;
 })();
+
 
 function mixin(dest){
     Object.defineProperties(dest, props);

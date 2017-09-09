@@ -25,6 +25,7 @@
   "jsnext:main": "dist/bundle.es.js",
   "module": "dist/bundle.es.js",
   "dependencies": {
-    "array-from": "^2.1.1"
+    "array-from": "^2.1.1",
+    "css-proxy": "^1.0.0"
   }
 }

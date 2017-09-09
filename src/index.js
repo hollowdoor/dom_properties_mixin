@@ -1,4 +1,5 @@
 import arrayFrom from 'array-from';
+import cssProxy from 'css-proxy';
 
 const props = (()=>{
     const props = {
@@ -13,11 +14,6 @@ const props = (()=>{
         last: {
             get(){
                 return this.element.lastChild;
-            }
-        },
-        nodeName: {
-            get(){
-                return this.element.nodeName;
             }
         },
         children: {
@@ -36,22 +32,9 @@ const props = (()=>{
                 return arrayFrom(this.element.childNodes);
             }
         },
-        value: {
-            set(value){
-                this.element.value = value;
-            },
-            get(){
-                return this.element.value;
-            }
-        },
-        innerHTML: {
-            set(html){
-                this.element.innerHTML = html;
-            }
-        },
         style: {
             get(){
-                if(!this._style){
+                if(this._style === void 0){
                     if(Proxy === void 0) return this.element.style;
                     if(isElement(el)){
                         this._style = cssProxy(el);
@@ -61,12 +44,38 @@ const props = (()=>{
                 }
                 return this._style;
             }
-        },
+        }
     };
 
-    Object.keys(props).forEach(prop=>prop.enumerable = true);
+
+    //Define simpler getters, and setters
+    ['value', 'innerHTML']
+    .forEach(prop=>{
+        props[prop] = {
+            get(){
+                return this.element[prop];
+            },
+            set(value){
+                this.element[prop] = value;
+            }
+        };
+    });
+
+    //Define simpler getters
+    ['nodeName']
+    .forEach(prop=>{
+        props[prop] = {
+            get(){
+                return this.element[prop];
+            }
+        };
+    });
+
+    //Enumerable properties are easier to debug
+    Object.keys(props).forEach(key=>props[key].enumerable = true);
     return props;
 })();
+
 
 export function mixin(dest){
     Object.defineProperties(dest, props);
