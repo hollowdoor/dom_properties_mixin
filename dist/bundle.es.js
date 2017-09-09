@@ -1,58 +1,60 @@
 import arrayFrom from 'array-from';
 
-const props = (()=>{
-    const props = {
+var props = (function (){
+    var props = {
         parent: {
-            get(){ return this.element.parentNode; }
+            get: function get(){ return this.element.parentNode; }
         },
         first:{
-            get(){
+            get: function get(){
                 return this.element.firstChild;
             }
         },
         last: {
-            get(){
+            get: function get(){
                 return this.element.lastChild;
             }
         },
         nodeName: {
-            get(){
+            get: function get(){
                 return this.element.nodeName;
             }
         },
         children: {
-            get(){
+            get: function get(){
                 return arrayFrom(this.element.children);
             },
-            set(children){
+            set: function set(children){
+                var this$1 = this;
+
                 this.element.innerHTML = '';
-                arrayFrom(children).forEach(child=>{
-                    this.element.appendChild(child);
+                arrayFrom(children).forEach(function (child){
+                    this$1.element.appendChild(child);
                 });
             }
         },
         childNodes: {
-            get(){
+            get: function get(){
                 return arrayFrom(this.element.childNodes);
             }
         },
         value: {
-            set(value){
+            set: function set(value){
                 this.element.value = value;
             },
-            get(){
+            get: function get(){
                 return this.element.value;
             }
         },
         innerHTML: {
-            set(html){
+            set: function set(html){
                 this.element.innerHTML = html;
             }
         },
         style: {
-            get(){
+            get: function get(){
                 if(!this._style){
-                    if(Proxy === void 0) return this.element.style;
+                    if(Proxy === void 0) { return this.element.style; }
                     if(isElement(el)){
                         this._style = cssProxy(el);
                     }else if(el === window || el === document){
@@ -64,17 +66,18 @@ const props = (()=>{
         },
     };
 
-    Object.keys(props).forEach(prop=>prop.enumerable = true);
+    Object.keys(props).forEach(function (prop){ return prop.enumerable = true; });
     return props;
 })();
 
-export function mixin(dest){
+function mixin(dest){
     Object.defineProperties(dest, props);
     return dest;
 }
 
-export function mixinDOMProperties(dest){
+function mixinDOMProperties(dest){
     return mix(dest);
 }
 
-export { props };
+export { mixin, mixinDOMProperties, props };
+//# sourceMappingURL=bundle.es.js.map

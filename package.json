@@ -2,7 +2,7 @@
   "name": "dom-properties-mixin",
   "version": "1.0.0",
   "description": "Mixinable DOM element properties",
-  "main": "index.js",
+  "main": "dist/bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "ebam"
@@ -21,5 +21,10 @@
     "manipulation"
   ],
   "author": "Quentin Engles <hollowdoor99@gmail.com> (https://hollowdoor.github.io/)",
-  "license": "MIT"
+  "license": "MIT",
+  "jsnext:main": "dist/bundle.es.js",
+  "module": "dist/bundle.es.js",
+  "dependencies": {
+    "array-from": "^2.1.1"
+  }
 }
