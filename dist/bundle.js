@@ -5,8 +5,11 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var arrayFrom = _interopDefault(require('array-from'));
+var cssProxy = _interopDefault(require('css-proxy'));
 
 var props = (function (){
+    //Renamed properties, and properties with unique behaviors
+    //are assigned directly to the original props object
     var props = {
         parent: {
             get: function get(){ return this.element.parentNode; }
@@ -14,16 +17,17 @@ var props = (function (){
         first:{
             get: function get(){
                 return this.element.firstChild;
+            },
+            set: function set(value){
+                this.element.replaceChild(value, this.firstChild);
             }
         },
         last: {
             get: function get(){
                 return this.element.lastChild;
-            }
-        },
-        nodeName: {
-            get: function get(){
-                return this.element.nodeName;
+            },
+            set: function set(value){
+                this.element.replaceChild(value, this.lastChild);
             }
         },
         children: {
@@ -44,37 +48,19 @@ var props = (function (){
                 return arrayFrom(this.element.childNodes);
             }
         },
-        /*value: {
-            set(value){
-                this.element.value = value;
-            },
-            get(){
-                return this.element.value;
-            }
-        },
-        innerHTML: {
-            set(html){
-                this.element.innerHTML = html;
-            },
-            get(){
-                return this.element.innerHTML;
-            }
-        },*/
         style: {
             get: function get(){
-                if(!this._style){
+                if(this._style === void 0){
                     if(Proxy === void 0) { return this.element.style; }
-                    if(isElement(el)){
-                        this._style = cssProxy(el);
-                    }else if(el === window || el === document){
-                        this._style = cssProxy();
-                    }
+                    this._style = cssProxy(this.element);
                 }
                 return this._style;
             }
-        },
+        }
     };
 
+
+    //Define simpler getters, and setters
     ['value', 'innerHTML']
     .forEach(function (prop){
         props[prop] = {
@@ -87,6 +73,17 @@ var props = (function (){
         };
     });
 
+    //Define simpler getters
+    ['nodeName']
+    .forEach(function (prop){
+        props[prop] = {
+            get: function get(){
+                return this.element[prop];
+            }
+        };
+    });
+
+    //Enumerable properties are easier to debug
     Object.keys(props).forEach(function (key){ return props[key].enumerable = true; });
     return props;
 })();

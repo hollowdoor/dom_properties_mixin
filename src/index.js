@@ -44,11 +44,7 @@ const props = (()=>{
             get(){
                 if(this._style === void 0){
                     if(Proxy === void 0) return this.element.style;
-                    if(isElement(el)){
-                        this._style = cssProxy(el);
-                    }else if(el === window || el === document){
-                        this._style = cssProxy();
-                    }
+                    this._style = cssProxy(this.element);
                 }
                 return this._style;
             }

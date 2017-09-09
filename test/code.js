@@ -219,7 +219,170 @@ var arrayFrom = (typeof Array.from === 'function' ?
   polyfill
 );
 
+var decamelize = function (str, sep) {
+	if (typeof str !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	sep = typeof sep === 'undefined' ? '_' : sep;
+
+	return str
+		.replace(/([a-z\d])([A-Z])/g, '$1' + sep + '$2')
+		.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + sep + '$2')
+		.toLowerCase();
+};
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var rgbHex = createCommonjsModule(function (module) {
+'use strict';
+/* eslint-disable no-mixed-operators */
+module.exports = function (red, green, blue, alpha) {
+	var isPercent = (red + (alpha || '')).toString().includes('%');
+
+	if (typeof red === 'string') {
+		var res = red.match(/(0?\.?\d{1,3})%?\b/g).map(Number);
+		// TODO: use destructuring when targeting Node.js 6
+		red = res[0];
+		green = res[1];
+		blue = res[2];
+		alpha = res[3];
+	} else if (alpha !== undefined) {
+		alpha = parseFloat(alpha);
+	}
+
+	if (typeof red !== 'number' ||
+		typeof green !== 'number' ||
+		typeof blue !== 'number' ||
+		red > 255 ||
+		green > 255 ||
+		blue > 255) {
+		throw new TypeError('Expected three numbers below 256');
+	}
+
+	if (typeof alpha === 'number') {
+		if (!isPercent && alpha >= 0 && alpha <= 1) {
+			alpha = Math.round(255 * alpha);
+		} else if (isPercent && alpha >= 0 && alpha <= 100) {
+			alpha = Math.round(255 * alpha / 100);
+		} else {
+			throw new TypeError(("Expected alpha value (" + alpha + ") as a fraction or percentage"));
+		}
+		alpha = (alpha | 1 << 8).toString(16).slice(1);
+	} else {
+		alpha = '';
+	}
+
+	return ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1) + alpha;
+};
+});
+
+//all properties are available
+//using getComputedStyle(element)
+//document.documentElement gets :root pseudo stuff
+function cssProxy(
+    element,
+    props,
+    pseudo
+){
+    if ( element === void 0 ) { element = document.documentElement; }
+    if ( props === void 0 ) { props = {}; }
+
+    if(typeof props !== 'object'){
+        props = {};
+    }
+
+    var allstyles = getComputedStyle(element, pseudo);
+
+    function getName(name){
+        //Computed styles contain all the properties.
+        if(allstyles[name] === void 0){
+            //supporting camelcase properties
+            return '--'+decamelize(name, '-');
+        }
+        return decamelize(name, '-');
+    }
+
+    var css = Object.assign(Object.create(null), ( obj = {
+        setProperty: function setProperty(name, value, priority){
+            element.style.setProperty(name, value, priority);
+        },
+        getProperty: function getProperty(name){
+            return allstyles.getPropertyValue(name);
+        },
+        cssGet: function cssGet(name){
+            if(nameOnElement(element, name)){
+                return element.style[name];
+            }
+            var v = this.getProperty(getName(name));
+            return !v || !v.length ? undefined : v.trim();
+        },
+        cssSet: function cssSet(name, value, priority){
+            this.setProperty(getName(name), convertValue(value), priority);
+        },
+        remove: function remove(name){
+            element.style.removeProperty(name);
+        },
+        setAll: function setAll(){
+            var arguments$1 = arguments;
+
+            var this$1 = this;
+            var propObjects = [], len = arguments.length;
+            while ( len-- ) { propObjects[ len ] = arguments$1[ len ]; }
+
+            propObjects.forEach(function (props){
+                Object.keys(props).forEach(function (key){
+                    this$1.cssSet(key, props[key]);
+                });
+            });
+            return this;
+        }
+    }, obj[Symbol.toPrimitive] = function (hint){
+            return '[object CSSProxy]';
+        }, obj ));
+    var obj;
+
+    var proxy = new Proxy(css, {
+        get: function get(target, name){
+            //Return methods
+            if(typeof target[name] === 'function')
+                { return target[name].bind(target); }
+            //Return properties
+            return target.cssGet(name);
+        },
+        set: function set(target, name, value){
+            target.cssSet(name, value);
+            return true;
+        }
+    });
+
+    Object.keys(props).forEach(function (key){
+        proxy[key] = props[key];
+    });
+
+    return proxy;
+}
+
+function nameOnElement(e, name){
+    return !/[-]{2}/.test(name) && e.style[name] !== undefined;
+}
+
+/*
+Setting variables, from variables works different.
+document.documentElement.style.setProperty("--my-bg-colour", "var(--my-fg-colour)");*/
+function convertValue(value){
+    if(/[-]{2}/.test(value + '')){
+        return ("var(--" + (decamelize(value + '')) + ")");
+    }else {
+        return value;
+    }
+}
+
 var props = (function (){
+    //Renamed properties, and properties with unique behaviors
+    //are assigned directly to the original props object
     var props = {
         parent: {
             get: function get(){ return this.element.parentNode; }
@@ -227,16 +390,17 @@ var props = (function (){
         first:{
             get: function get(){
                 return this.element.firstChild;
+            },
+            set: function set(value){
+                this.element.replaceChild(value, this.firstChild);
             }
         },
         last: {
             get: function get(){
                 return this.element.lastChild;
-            }
-        },
-        nodeName: {
-            get: function get(){
-                return this.element.nodeName;
+            },
+            set: function set(value){
+                this.element.replaceChild(value, this.lastChild);
             }
         },
         children: {
@@ -257,37 +421,19 @@ var props = (function (){
                 return arrayFrom(this.element.childNodes);
             }
         },
-        /*value: {
-            set(value){
-                this.element.value = value;
-            },
-            get(){
-                return this.element.value;
-            }
-        },
-        innerHTML: {
-            set(html){
-                this.element.innerHTML = html;
-            },
-            get(){
-                return this.element.innerHTML;
-            }
-        },*/
         style: {
             get: function get(){
-                if(!this._style){
+                if(this._style === void 0){
                     if(Proxy === void 0) { return this.element.style; }
-                    if(isElement(el)){
-                        this._style = cssProxy(el);
-                    }else if(el === window || el === document){
-                        this._style = cssProxy();
-                    }
+                    this._style = cssProxy(this.element);
                 }
                 return this._style;
             }
-        },
+        }
     };
 
+
+    //Define simpler getters, and setters
     ['value', 'innerHTML']
     .forEach(function (prop){
         props[prop] = {
@@ -300,6 +446,17 @@ var props = (function (){
         };
     });
 
+    //Define simpler getters
+    ['nodeName']
+    .forEach(function (prop){
+        props[prop] = {
+            get: function get(){
+                return this.element[prop];
+            }
+        };
+    });
+
+    //Enumerable properties are easier to debug
     Object.keys(props).forEach(function (key){ return props[key].enumerable = true; });
     return props;
 })();
@@ -312,20 +469,35 @@ function mixin(dest){
 
 var MyElement = function MyElement(tag){
     mixin(this);
-    this.element = document.createElement(tag);
-    document.body.appendChild(this.element);
+    if(typeof tag === 'string'){
+        this.element = document.createElement(tag);
+    }else{
+        this.element = tag;
+    }
+    if(this.element !== document.body)
+        { document.body.appendChild(this.element); }
 };
 
-var el$1 = new MyElement('input');
-el$1.value = 'Hi!';
-print(el$1.value);
+var el = new MyElement('input');
+print(el.parent);
+el.value = 'Hi!';
+print(el.value);
+el.style.color = 'blue';
 var p = new MyElement('p');
 p.innerHTML = "I'm a paragraph";
 print(p.innerHTML);
+var body = new MyElement(document.body);
+print(body.first); print(body.last);
+print(body.childNodes);
 
 function print(value){
     var div = document.createElement('div');
-    div.innerHTML = 'TEST: '+value;
+    try{
+        div.innerHTML = 'TEST: '+JSON.stringify(value);
+    }catch(e){
+        div.innerHTML = 'TEST: '+value;
+    }
+
     document.body.appendChild(div);
 }
 
