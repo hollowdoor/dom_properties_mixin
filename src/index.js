@@ -13,7 +13,12 @@ const props = (()=>{
                 return this.element.firstChild;
             },
             set(value){
-                this.element.replaceChild(value, this.firstChild);
+                if(this.element.firstChild !== void 0){
+                    return this.element.replaceChild(
+                        get(value), this.element.firstChild
+                    );
+                }
+                this.element.appendChild(get(value));
             }
         },
         last: {
@@ -21,7 +26,12 @@ const props = (()=>{
                 return this.element.lastChild;
             },
             set(value){
-                this.element.replaceChild(value, this.lastChild);
+                if(this.element.lastChild !== void 0){
+                    return this.element.replaceChild(
+                        get(value), this.element.lastChild
+                    );
+                }
+                this.element.appendChild(get(value));
             }
         },
         children: {
@@ -31,7 +41,7 @@ const props = (()=>{
             set(children){
                 this.element.innerHTML = '';
                 arrayFrom(children).forEach(child=>{
-                    this.element.appendChild(child);
+                    this.element.appendChild(get(child));
                 });
             }
         },
@@ -97,3 +107,8 @@ export function mixinDOMProperties(dest){
 }
 
 export { props };
+
+function get(e){
+    if(e.element !== void 0) return e.element;
+    return e;
+}

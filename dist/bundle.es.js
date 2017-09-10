@@ -13,7 +13,12 @@ var props = (function (){
                 return this.element.firstChild;
             },
             set: function set(value){
-                this.element.replaceChild(value, this.firstChild);
+                if(this.element.firstChild !== void 0){
+                    return this.element.replaceChild(
+                        get(value), this.element.firstChild
+                    );
+                }
+                this.element.appendChild(get(value));
             }
         },
         last: {
@@ -21,7 +26,12 @@ var props = (function (){
                 return this.element.lastChild;
             },
             set: function set(value){
-                this.element.replaceChild(value, this.lastChild);
+                if(this.element.lastChild !== void 0){
+                    return this.element.replaceChild(
+                        get(value), this.element.lastChild
+                    );
+                }
+                this.element.appendChild(get(value));
             }
         },
         children: {
@@ -33,7 +43,7 @@ var props = (function (){
 
                 this.element.innerHTML = '';
                 arrayFrom(children).forEach(function (child){
-                    this$1.element.appendChild(child);
+                    this$1.element.appendChild(get(child));
                 });
             }
         },
@@ -96,6 +106,11 @@ function mixin(dest){
 
 function mixinDOMProperties(dest){
     return mix(dest);
+}
+
+function get(e){
+    if(e.element !== void 0) { return e.element; }
+    return e;
 }
 
 export { mixin, mixinDOMProperties, props };
