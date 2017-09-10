@@ -48,12 +48,18 @@ const props = (()=>{
                 }
                 return this._style;
             }
+        },
+        root: {
+            get(){
+                return this.element.rootNode;
+            }
         }
     };
 
 
     //Define simpler getters, and setters
-    ['value', 'innerHTML']
+    ['value', 'innerHTML', 'outerHTML', 'textContent',
+    'className', 'classList']
     .forEach(prop=>{
         props[prop] = {
             get(){
@@ -66,7 +72,7 @@ const props = (()=>{
     });
 
     //Define simpler getters
-    ['nodeName']
+    ['nodeName', 'nextSibling', 'nodeType', 'nodeName']
     .forEach(prop=>{
         props[prop] = {
             get(){

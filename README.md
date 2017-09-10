@@ -62,9 +62,13 @@ When getting from `el.children` you will receive an array instead of the usual n
 
 When setting `el.children` you can pass an array of DOM elements, or a DOM list like `element.children`, and the entire contents of `element.children` will be replaced by the new children.
 
-### el.childNodes
+The properties the same as on a reqular element.
 
-`el.childNodes` is identical to `element.childNodes`.
+* el.childNodes
+* el.textContent
+* el.className
+* el.classList
+* el.nextSibling
 
 ### el.style
 
