@@ -1,6 +1,6 @@
 {
   "name": "dom-properties-mixin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Mixinable DOM element properties",
   "main": "dist/bundle.js",
   "scripts": {
