@@ -105,7 +105,7 @@ function mixin(dest){
 }
 
 function mixinDOMProperties(dest){
-    return mix(dest);
+    return mixin(dest);
 }
 
 function get(e){

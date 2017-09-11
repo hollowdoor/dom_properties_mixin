@@ -103,7 +103,7 @@ export function mixin(dest){
 }
 
 export function mixinDOMProperties(dest){
-    return mix(dest);
+    return mixin(dest);
 }
 
 export { props };
