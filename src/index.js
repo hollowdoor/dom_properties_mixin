@@ -63,6 +63,11 @@ const props = (()=>{
             get(){
                 return this.element.rootNode;
             }
+        },
+        data: {
+            get(){
+                return this.element.dataset;
+            }
         }
     };
 

@@ -76,6 +76,10 @@ The properties the same as on a reqular element.
 
 See [css-proxy](https://github.com/hollowdoor/css_proxy) to find out more about what returns from `el.style`.
 
+### el.data
+
+`el.data` is equal to `element.dataset`.
+
 About
 ----
 

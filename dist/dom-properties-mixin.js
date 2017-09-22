@@ -444,6 +444,11 @@ var props = (function (){
             get: function get(){
                 return this.element.rootNode;
             }
+        },
+        data: {
+            get: function get(){
+                return this.element.dataset;
+            }
         }
     };
 

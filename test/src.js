@@ -21,6 +21,8 @@ el.style.color = 'blue';
 const p = new MyElement('p');
 p.innerHTML = "I'm a paragraph"
 print(p.innerHTML);
+p.data.thing = 'bla';
+print(p.data.thing);
 const body = new MyElement(document.body);
 print(body.first); print(body.last);
 print(body.childNodes);
